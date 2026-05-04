@@ -1435,16 +1435,7 @@ export function Router({
       },
       navigationType,
     };
-  }, [
-    basename,
-    pathname,
-    search,
-    hash,
-    state,
-    key,
-    navigationType,
-    mask,
-  ]);
+  }, [basename, pathname, search, hash, state, key, navigationType, mask]);
 
   warning(
     locationContext != null,

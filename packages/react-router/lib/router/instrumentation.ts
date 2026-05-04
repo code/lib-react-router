@@ -32,13 +32,9 @@ export type InstrumentRequestHandlerFunction = (
   handler: InstrumentableRequestHandler,
 ) => void;
 
-export type InstrumentRouterFunction = (
-  router: InstrumentableRouter,
-) => void;
+export type InstrumentRouterFunction = (router: InstrumentableRouter) => void;
 
-export type InstrumentRouteFunction = (
-  route: InstrumentableRoute,
-) => void;
+export type InstrumentRouteFunction = (route: InstrumentableRoute) => void;
 
 export type InstrumentationHandlerResult =
   | { status: "success"; error: undefined }
@@ -406,20 +402,19 @@ async function recurseRight<T extends InstrumentationInfo>(
     // If they forget to call the handler, or if they throw before calling the
     // handler, we need to ensure the handlers still gets called
     let handlerPromise: ReturnType<typeof recurseRight> | undefined = undefined;
-    let callHandler =
-      async (): Promise<InstrumentationHandlerResult> => {
-        if (handlerPromise) {
-          console.error("You cannot call instrumented handlers more than once");
-        } else {
-          handlerPromise = recurseRight(impls, info, handler, index - 1);
-        }
-        result = await handlerPromise;
-        invariant(result, "Expected a result");
-        if (result.type === "error" && result.value instanceof Error) {
-          return { status: "error", error: result.value };
-        }
-        return { status: "success", error: undefined };
-      };
+    let callHandler = async (): Promise<InstrumentationHandlerResult> => {
+      if (handlerPromise) {
+        console.error("You cannot call instrumented handlers more than once");
+      } else {
+        handlerPromise = recurseRight(impls, info, handler, index - 1);
+      }
+      result = await handlerPromise;
+      invariant(result, "Expected a result");
+      if (result.type === "error" && result.value instanceof Error) {
+        return { status: "error", error: result.value };
+      }
+      return { status: "success", error: undefined };
+    };
 
     try {
       await impl(callHandler, info);

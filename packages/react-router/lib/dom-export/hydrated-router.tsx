@@ -188,8 +188,7 @@ function createHydratedRouter({
     instrumentations,
     mapRouteProperties,
     future: {
-      v8_passThroughRequests:
-        ssrInfo.context.future.v8_passThroughRequests,
+      v8_passThroughRequests: ssrInfo.context.future.v8_passThroughRequests,
     },
     dataStrategy: getTurboStreamSingleFetchDataStrategy(
       () => router,

@@ -2591,8 +2591,7 @@ export function useSubmit(): SubmitFunction {
       if (options.navigate === false) {
         let key = options.fetcherKey || getUniqueFetcherId();
         await routerFetch(key, currentRouteId, options.action || action, {
-          defaultShouldRevalidate:
-            options.defaultShouldRevalidate,
+          defaultShouldRevalidate: options.defaultShouldRevalidate,
           preventScrollReset: options.preventScrollReset,
           formData,
           body,
@@ -2602,8 +2601,7 @@ export function useSubmit(): SubmitFunction {
         });
       } else {
         await routerNavigate(options.action || action, {
-          defaultShouldRevalidate:
-            options.defaultShouldRevalidate,
+          defaultShouldRevalidate: options.defaultShouldRevalidate,
           preventScrollReset: options.preventScrollReset,
           formData,
           body,

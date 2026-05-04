@@ -135,11 +135,7 @@ startTransition(() => {
   hydrateRoot(
     document,
     <StrictMode>
-      <HydratedRouter
-        instrumentations={
-          instrumentations
-        }
-      />
+      <HydratedRouter instrumentations={instrumentations} />
     </StrictMode>,
   );
 });
@@ -267,9 +263,7 @@ export const instrumentations = [
 ];
 
 // Framework Mode (entry.client.tsx)
-<HydratedRouter
-  instrumentations={instrumentations}
-/>;
+<HydratedRouter instrumentations={instrumentations} />;
 
 // Data Mode
 const router = createBrowserRouter(routes, {

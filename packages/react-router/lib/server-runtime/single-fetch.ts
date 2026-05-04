@@ -79,8 +79,7 @@ export async function singleFetchAction(
             }
           }
         : undefined,
-      normalizePath: (r) =>
-        getNormalizedPath(r, build.basename, build.future),
+      normalizePath: (r) => getNormalizedPath(r, build.basename, build.future),
     });
 
     return handleQueryResult(result);
@@ -173,8 +172,7 @@ export async function singleFetchLoaders(
             }
           }
         : undefined,
-      normalizePath: (r) =>
-        getNormalizedPath(r, build.basename, build.future),
+      normalizePath: (r) => getNormalizedPath(r, build.basename, build.future),
     });
 
     return handleQueryResult(result);

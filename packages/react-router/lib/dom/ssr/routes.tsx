@@ -340,13 +340,7 @@ export function createClientRoutes(
         (routeModule.clientLoader?.hydrate === true || !route.hasLoader);
 
       dataRoute.loader = async (
-        {
-          request,
-          params,
-          context,
-          pattern,
-          url,
-        }: LoaderFunctionArgs,
+        { request, params, context, pattern, url }: LoaderFunctionArgs,
         singleFetch?: unknown,
       ) => {
         try {
@@ -401,13 +395,7 @@ export function createClientRoutes(
       );
 
       dataRoute.action = (
-        {
-          request,
-          params,
-          context,
-          pattern,
-          url,
-        }: ActionFunctionArgs,
+        { request, params, context, pattern, url }: ActionFunctionArgs,
         singleFetch?: unknown,
       ) => {
         return prefetchStylesAndCallHandler(async () => {

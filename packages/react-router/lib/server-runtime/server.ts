@@ -510,8 +510,7 @@ async function handleDocumentRequest(
             }
           }
         : undefined,
-      normalizePath: (r) =>
-        getNormalizedPath(r, build.basename, build.future),
+      normalizePath: (r) => getNormalizedPath(r, build.basename, build.future),
     });
 
     if (!isResponse(result)) {
@@ -690,8 +689,7 @@ async function handleResourceRequest(
             }
           }
         : undefined,
-      normalizePath: (r) =>
-        getNormalizedPath(r, build.basename, build.future),
+      normalizePath: (r) => getNormalizedPath(r, build.basename, build.future),
     });
 
     return handleQueryRouteResult(result);
