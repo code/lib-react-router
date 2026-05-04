@@ -1,8 +1,4 @@
----
-"react-router": patch
----
-
-Improve route matching performance in Framework/Data Mode
+Improve route matching performance in Framework/Data Mode ([#14971](https://github.com/remix-run/react-router/pull/14971))
 
 - Avoiding unnecessary calls to `matchRoutes` in data router scenarios
   - This includes adding back the optimization that was removed in `7.6.0` ([#13562](https://github.com/remix-run/react-router/pull/13562))
