@@ -9,10 +9,10 @@ import {
   warning,
 } from "./history";
 import type {
-  unstable_ClientInstrumentation,
-  unstable_InstrumentRouteFunction,
-  unstable_InstrumentRouterFunction,
-  unstable_ServerInstrumentation,
+  ClientInstrumentation,
+  InstrumentRouteFunction,
+  InstrumentRouterFunction,
+  ServerInstrumentation,
 } from "./instrumentation";
 import {
   getRouteInstrumentationUpdates,
@@ -426,9 +426,7 @@ export type HydrationState = Partial<
 /**
  * Future flags to toggle new feature behavior
  */
-export interface FutureConfig {
-  unstable_passThroughRequests: boolean;
-}
+export interface FutureConfig {}
 
 /**
  * Initialization options for createRouter
@@ -438,7 +436,7 @@ export interface RouterInit {
   history: History;
   basename?: string;
   getContext?: () => MaybePromise<RouterContextProvider>;
-  unstable_instrumentations?: unstable_ClientInstrumentation[];
+  instrumentations?: ClientInstrumentation[];
   mapRouteProperties?: MapRoutePropertiesFunction;
   future?: Partial<FutureConfig>;
   hydrationRouteProperties?: string[];
@@ -493,7 +491,7 @@ export interface StaticHandler {
    * @param opts.requestContext Context object to pass to loaders/actions
    * @param opts.skipLoaderErrorBubbling Skip loader error bubbling
    * @param opts.skipRevalidation Skip revalidation after action submission
-   * @param opts.unstable_normalizePath Normalize the request path
+   * @param opts.normalizePath Normalize the request path
    */
   query(
     request: Request,
@@ -511,7 +509,7 @@ export interface StaticHandler {
           },
         ) => Promise<StaticHandlerContext | Response>,
       ) => MaybePromise<Response>;
-      unstable_normalizePath?: (request: Request) => Path;
+      normalizePath?: (request: Request) => Path;
     },
   ): Promise<StaticHandlerContext | Response>;
   /**
@@ -524,7 +522,7 @@ export interface StaticHandler {
    * to generate a response to bubble back up the middleware chain
    * @param opts.requestContext Context object to pass to loaders/actions
    * @param opts.routeId The ID of the route to query
-   * @param opts.unstable_normalizePath Normalize the request path
+   * @param opts.normalizePath Normalize the request path
 
    */
   queryRoute(
@@ -536,7 +534,7 @@ export interface StaticHandler {
       generateMiddlewareResponse?: (
         queryRoute: (r: Request) => Promise<Response>,
       ) => MaybePromise<Response>;
-      unstable_normalizePath?: (request: Request) => Path;
+      normalizePath?: (request: Request) => Path;
     },
   ): Promise<any>;
 }
@@ -591,7 +589,7 @@ type BaseNavigateOrFetchOptions = {
   preventScrollReset?: boolean;
   relative?: RelativeRoutingType;
   flushSync?: boolean;
-  unstable_defaultShouldRevalidate?: boolean;
+  defaultShouldRevalidate?: boolean;
 };
 
 // Only allowed for navigations
@@ -600,7 +598,7 @@ type BaseNavigateOptions = BaseNavigateOrFetchOptions & {
   state?: any;
   fromRouteId?: string;
   viewTransition?: boolean;
-  unstable_mask?: To;
+  mask?: To;
 };
 
 // Only allowed for submission navigations
@@ -1006,8 +1004,8 @@ export function createRouter(init: RouterInit): Router {
 
   // Leverage the existing mapRouteProperties logic to execute instrumentRoute
   // (if it exists) on all routes in the application
-  if (init.unstable_instrumentations) {
-    let instrumentations = init.unstable_instrumentations;
+  if (init.instrumentations) {
+    let instrumentations = init.instrumentations;
 
     mapRouteProperties = (route: DataRouteObject) => {
       return {
@@ -1015,7 +1013,7 @@ export function createRouter(init: RouterInit): Router {
         ...getRouteInstrumentationUpdates(
           instrumentations
             .map((i) => i.route)
-            .filter(Boolean) as unstable_InstrumentRouteFunction[],
+            .filter(Boolean) as InstrumentRouteFunction[],
           route,
         ),
       };
@@ -1042,7 +1040,6 @@ export function createRouter(init: RouterInit): Router {
 
   // Config driven behavior flags
   let future: FutureConfig = {
-    unstable_passThroughRequests: false,
     ...init.future,
   };
 
@@ -1658,13 +1655,13 @@ export function createRouter(init: RouterInit): Router {
 
     // If mask is provided, normalize and create a separate path for the router
     let maskPath: Path | undefined;
-    if (opts?.unstable_mask) {
+    if (opts?.mask) {
       let partialPath =
-        typeof opts.unstable_mask === "string"
-          ? parsePath(opts.unstable_mask)
+        typeof opts.mask === "string"
+          ? parsePath(opts.mask)
           : {
-              ...state.location.unstable_mask,
-              ...opts.unstable_mask,
+              ...state.location.mask,
+              ...opts.mask,
             };
       maskPath = {
         pathname: "",
@@ -1759,8 +1756,7 @@ export function createRouter(init: RouterInit): Router {
       replace: opts && opts.replace,
       enableViewTransition: opts && opts.viewTransition,
       flushSync,
-      callSiteDefaultShouldRevalidate:
-        opts && opts.unstable_defaultShouldRevalidate,
+      callSiteDefaultShouldRevalidate: opts && opts.defaultShouldRevalidate,
     });
   }
 
@@ -2585,7 +2581,7 @@ export function createRouter(init: RouterInit): Router {
         flushSync,
         preventScrollReset,
         submission,
-        opts && opts.unstable_defaultShouldRevalidate,
+        opts && opts.defaultShouldRevalidate,
       );
       return;
     }
@@ -3882,12 +3878,12 @@ export function createRouter(init: RouterInit): Router {
     },
   };
 
-  if (init.unstable_instrumentations) {
+  if (init.instrumentations) {
     router = instrumentClientSideRouter(
       router,
-      init.unstable_instrumentations
+      init.instrumentations
         .map((i) => i.router)
-        .filter(Boolean) as unstable_InstrumentRouterFunction[],
+        .filter(Boolean) as InstrumentRouterFunction[],
     );
   }
 
@@ -3902,7 +3898,7 @@ export function createRouter(init: RouterInit): Router {
 export interface CreateStaticHandlerOptions {
   basename?: string;
   mapRouteProperties?: MapRoutePropertiesFunction;
-  unstable_instrumentations?: Pick<unstable_ServerInstrumentation, "route">[];
+  instrumentations?: Pick<ServerInstrumentation, "route">[];
   future?: Partial<FutureConfig>;
 }
 
@@ -3923,14 +3919,13 @@ export function createStaticHandler(
   // Currently unused in the static handler, but available for additional flags in the future
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let future: FutureConfig = {
-    unstable_passThroughRequests: false, // unused in static handler
     ...opts?.future,
   };
 
   // Leverage the existing mapRouteProperties logic to execute instrumentRoute
   // (if it exists) on all routes in the application
-  if (opts?.unstable_instrumentations) {
-    let instrumentations = opts.unstable_instrumentations;
+  if (opts?.instrumentations) {
+    let instrumentations = opts.instrumentations;
 
     mapRouteProperties = (route: DataRouteObject) => {
       return {
@@ -3938,7 +3933,7 @@ export function createStaticHandler(
         ...getRouteInstrumentationUpdates(
           instrumentations
             .map((i) => i.route)
-            .filter(Boolean) as unstable_InstrumentRouteFunction[],
+            .filter(Boolean) as InstrumentRouteFunction[],
           route,
         ),
       };
@@ -3990,12 +3985,17 @@ export function createStaticHandler(
       skipRevalidation,
       dataStrategy,
       generateMiddlewareResponse,
-      unstable_normalizePath,
+      normalizePath,
     }: Parameters<StaticHandler["query"]>[1] = {},
   ): Promise<StaticHandlerContext | Response> {
-    let normalizePath = unstable_normalizePath || defaultNormalizePath;
+    let normalizePathImpl = normalizePath || defaultNormalizePath;
     let method = request.method;
-    let location = createLocation("", normalizePath(request), null, "default");
+    let location = createLocation(
+      "",
+      normalizePathImpl(request),
+      null,
+      "default",
+    );
     let matches = matchRoutesImpl(
       dataRoutes,
       location,
@@ -4080,8 +4080,8 @@ export function createStaticHandler(
         let response = await runServerMiddlewarePipeline(
           {
             request,
-            unstable_url: createDataFunctionUrl(request, location),
-            unstable_pattern: getRoutePattern(matches),
+            url: createDataFunctionUrl(request, location),
+            pattern: getRoutePattern(matches),
             matches,
             params: matches[0].params,
             // If we're calling middleware then it must be enabled so we can cast
@@ -4273,12 +4273,17 @@ export function createStaticHandler(
       requestContext,
       dataStrategy,
       generateMiddlewareResponse,
-      unstable_normalizePath,
+      normalizePath,
     }: Parameters<StaticHandler["queryRoute"]>[1] = {},
   ): Promise<any> {
-    let normalizePath = unstable_normalizePath || defaultNormalizePath;
+    let normalizePathImpl = normalizePath || defaultNormalizePath;
     let method = request.method;
-    let location = createLocation("", normalizePath(request), null, "default");
+    let location = createLocation(
+      "",
+      normalizePathImpl(request),
+      null,
+      "default",
+    );
     let matches = matchRoutesImpl(
       dataRoutes,
       location,
@@ -4320,8 +4325,8 @@ export function createStaticHandler(
       let response = await runServerMiddlewarePipeline(
         {
           request,
-          unstable_url: createDataFunctionUrl(request, location),
-          unstable_pattern: getRoutePattern(matches),
+          url: createDataFunctionUrl(request, location),
+          pattern: getRoutePattern(matches),
           matches,
           params: matches[0].params,
           // If we're calling middleware then it must be enabled so we can cast
@@ -6223,7 +6228,7 @@ function getDataStrategyMatch(
   manifest: RouteManifest,
   request: Request,
   path: To,
-  unstable_pattern: string,
+  pattern: string,
   match: DataRouteMatch,
   lazyRoutePropertiesToSkip: string[],
   scopedContext: unknown,
@@ -6294,7 +6299,7 @@ function getDataStrategyMatch(
         return callLoaderOrAction({
           request,
           path,
-          unstable_pattern,
+          pattern,
           match,
           lazyHandlerPromise: _lazyPromises?.handler,
           lazyRoutePromise: _lazyPromises?.route,
@@ -6375,8 +6380,8 @@ async function callDataStrategyImpl(
     "fetcherKey" | "runClientMiddleware"
   > = {
     request,
-    unstable_url: createDataFunctionUrl(request, path),
-    unstable_pattern: getRoutePattern(matches),
+    url: createDataFunctionUrl(request, path),
+    pattern: getRoutePattern(matches),
     params: matches[0].params,
     context: scopedContext,
     matches,
@@ -6435,7 +6440,7 @@ async function callDataStrategyImpl(
 async function callLoaderOrAction({
   request,
   path,
-  unstable_pattern,
+  pattern,
   match,
   lazyHandlerPromise,
   lazyRoutePromise,
@@ -6444,7 +6449,7 @@ async function callLoaderOrAction({
 }: {
   request: Request;
   path: To;
-  unstable_pattern: string;
+  pattern: string;
   match: DataRouteMatch;
   lazyHandlerPromise: Promise<void> | undefined;
   lazyRoutePromise: Promise<void> | undefined;
@@ -6478,8 +6483,8 @@ async function callLoaderOrAction({
       return handler(
         {
           request,
-          unstable_url: createDataFunctionUrl(request, path),
-          unstable_pattern,
+          url: createDataFunctionUrl(request, path),
+          pattern,
           params: match.params,
           context: scopedContext,
         },
@@ -6778,7 +6783,7 @@ function createClientSideRequest(
   return new Request(url, init);
 }
 
-// Create the unstable_url object to pass to loaders/actions/middleware.
+// Create the normalized URL instance to pass to loaders/actions/middleware.
 // We strip the `?index` param because that is a React Router implementation detail.
 function createDataFunctionUrl(request: Request, path: To): URL {
   let url = new URL(request.url);

@@ -86,7 +86,7 @@ export function StaticRouter({
     hash: locationProp.hash || "",
     state: locationProp.state != null ? locationProp.state : null,
     key: locationProp.key || "default",
-    unstable_mask: undefined,
+    mask: undefined,
   };
 
   let staticNavigator = getStatelessNavigator();
@@ -98,7 +98,7 @@ export function StaticRouter({
       navigationType={action}
       navigator={staticNavigator}
       static={true}
-      unstable_useTransitions={false}
+      useTransitions={false}
     />
   );
 }
@@ -209,7 +209,7 @@ export function StaticRouterProvider({
                 navigationType={state.historyAction}
                 navigator={dataRouterContext.navigator}
                 static={dataRouterContext.static}
-                unstable_useTransitions={false}
+                useTransitions={false}
               >
                 <DataRoutes
                   manifest={router.manifest}
@@ -418,7 +418,7 @@ export function createStaticRouter(
     get future() {
       return {
         v8_middleware: false,
-        unstable_passThroughRequests: false,
+        v8_passThroughRequests: false,
         ...opts?.future,
       };
     },

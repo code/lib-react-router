@@ -947,7 +947,7 @@ export function useRoutesImpl(
             hash: "",
             state: null,
             key: "default",
-            unstable_mask: undefined,
+            mask: undefined,
             ...location,
           },
           navigationType: NavigationType.Pop,
@@ -1294,7 +1294,7 @@ export function _renderMatches(
           onErrorHandler(error, {
             location: dataRouterState.location,
             params: dataRouterState.matches?.[0]?.params ?? {},
-            unstable_pattern: getRoutePattern(dataRouterState.matches),
+            pattern: getRoutePattern(dataRouterState.matches),
             errorInfo,
           });
         }

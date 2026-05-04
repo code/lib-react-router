@@ -73,7 +73,7 @@ import {
 } from "./hooks";
 import type { ViewTransition } from "./dom/global";
 import { warnOnce } from "./server-runtime/warnings";
-import type { unstable_ClientInstrumentation } from "./router/instrumentation";
+import type { ClientInstrumentation } from "./router/instrumentation";
 
 /**
  * Webpack can fail to compile against react versions without this export -
@@ -211,7 +211,7 @@ export interface MemoryRouterOpts {
    *
    * ```tsx
    * let router = createBrowserRouter(routes, {
-   *   unstable_instrumentations: [logging]
+   *   instrumentations: [logging]
    * });
    *
    *
@@ -249,7 +249,7 @@ export interface MemoryRouterOpts {
    * }
    * ```
    */
-  unstable_instrumentations?: unstable_ClientInstrumentation[];
+  instrumentations?: ClientInstrumentation[];
   /**
    * Override the default data strategy of running loaders in parallel -
    * see the [docs](../../how-to/data-strategy) for more information.
@@ -302,7 +302,7 @@ export interface MemoryRouterOpts {
  * @param {MemoryRouterOpts.hydrationData} opts.hydrationData n/a
  * @param {MemoryRouterOpts.initialEntries} opts.initialEntries n/a
  * @param {MemoryRouterOpts.initialIndex} opts.initialIndex n/a
- * @param {MemoryRouterOpts.unstable_instrumentations} opts.unstable_instrumentations n/a
+ * @param {MemoryRouterOpts.instrumentations} opts.instrumentations n/a
  * @param {MemoryRouterOpts.patchRoutesOnNavigation} opts.patchRoutesOnNavigation n/a
  * @returns An initialized {@link DataRouter} to pass to {@link RouterProvider | `<RouterProvider>`}
  */
@@ -324,7 +324,7 @@ export function createMemoryRouter(
     mapRouteProperties,
     dataStrategy: opts?.dataStrategy,
     patchRoutesOnNavigation: opts?.patchRoutesOnNavigation,
-    unstable_instrumentations: opts?.unstable_instrumentations,
+    instrumentations: opts?.instrumentations,
   }).initialize();
 }
 
@@ -363,7 +363,7 @@ export interface ClientOnErrorFunction {
     info: {
       location: Location;
       params: Params;
-      unstable_pattern: string;
+      pattern: string;
       errorInfo?: React.ErrorInfo;
     },
   ): void;
@@ -399,7 +399,7 @@ export interface RouterProviderProps {
    *
    * ```tsx
    * <RouterProvider onError=(error, info) => {
-   *   let { location, params, unstable_pattern, errorInfo } = info;
+   *   let { location, params, pattern, errorInfo } = info;
    *   console.error(error, location, errorInfo);
    *   reportToErrorService(error, location, errorInfo);
    * }} />
@@ -422,9 +422,9 @@ export interface RouterProviderProps {
    * - When set to `false`, the router will not leverage `React.startTransition` or
    *   `React.useOptimistic` on any navigations or state changes.
    *
-   * For more information, please see the [docs](https://reactrouter.com/explanation/react-transitions).
+   * For more information, please see the [docs](../../explanation/react-transitions).
    */
-  unstable_useTransitions?: boolean;
+  useTransitions?: boolean;
 }
 
 /**
@@ -456,17 +456,17 @@ export interface RouterProviderProps {
  * @param {RouterProviderProps.flushSync} props.flushSync n/a
  * @param {RouterProviderProps.onError} props.onError n/a
  * @param {RouterProviderProps.router} props.router n/a
- * @param {RouterProviderProps.unstable_useTransitions} props.unstable_useTransitions n/a
+ * @param {RouterProviderProps.useTransitions} props.useTransitions n/a
  * @returns React element for the rendered router
  */
 export function RouterProvider({
   router,
   flushSync: reactDomFlushSyncImpl,
   onError,
-  unstable_useTransitions,
+  useTransitions,
 }: RouterProviderProps): React.ReactElement {
   let unstable_rsc = useIsRSCRouterContext();
-  unstable_useTransitions = unstable_rsc || unstable_useTransitions;
+  useTransitions = unstable_rsc || useTransitions;
 
   let [_state, setStateImpl] = React.useState(router.state);
   let [state, setOptimisticState] = useOptimisticSafe(_state);
@@ -494,7 +494,7 @@ export function RouterProvider({
           onError(error, {
             location: newState.location,
             params: newState.matches[0]?.params ?? {},
-            unstable_pattern: getRoutePattern(newState.matches),
+            pattern: getRoutePattern(newState.matches),
           }),
         );
       }
@@ -533,11 +533,11 @@ export function RouterProvider({
       if (!viewTransitionOpts || !isViewTransitionAvailable) {
         if (reactDomFlushSyncImpl && flushSync) {
           reactDomFlushSyncImpl(() => setStateImpl(newState));
-        } else if (unstable_useTransitions === false) {
+        } else if (useTransitions === false) {
           setStateImpl(newState);
         } else {
           React.startTransition(() => {
-            if (unstable_useTransitions === true) {
+            if (useTransitions === true) {
               setOptimisticState((s) => getOptimisticRouterState(s, newState));
             }
             setStateImpl(newState);
@@ -609,7 +609,7 @@ export function RouterProvider({
       reactDomFlushSyncImpl,
       transition,
       renderDfd,
-      unstable_useTransitions,
+      useTransitions,
       setOptimisticState,
       onError,
     ],
@@ -649,11 +649,11 @@ export function RouterProvider({
       let newState = pendingState;
       let renderPromise = renderDfd.promise;
       let transition = router.window.document.startViewTransition(async () => {
-        if (unstable_useTransitions === false) {
+        if (useTransitions === false) {
           setStateImpl(newState);
         } else {
           React.startTransition(() => {
-            if (unstable_useTransitions === true) {
+            if (useTransitions === true) {
               setOptimisticState((s) => getOptimisticRouterState(s, newState));
             }
             setStateImpl(newState);
@@ -673,7 +673,7 @@ export function RouterProvider({
     pendingState,
     renderDfd,
     router.window,
-    unstable_useTransitions,
+    useTransitions,
     setOptimisticState,
   ]);
 
@@ -753,7 +753,7 @@ export function RouterProvider({
                 location={state.location}
                 navigationType={state.historyAction}
                 navigator={navigator}
-                unstable_useTransitions={unstable_useTransitions}
+                useTransitions={useTransitions}
               >
                 <MemoizedDataRoutes
                   routes={router.routes}
@@ -859,9 +859,9 @@ export interface MemoryRouterProps {
    * - When set to `false`, the router will not leverage `React.startTransition`
    *   on any navigations or state changes.
    *
-   * For more information, please see the [docs](https://reactrouter.com/explanation/react-transitions).
+   * For more information, please see the [docs](../../explanation/react-transitions).
    */
-  unstable_useTransitions?: boolean;
+  useTransitions?: boolean;
 }
 
 /**
@@ -875,7 +875,7 @@ export interface MemoryRouterProps {
  * @param {MemoryRouterProps.children} props.children n/a
  * @param {MemoryRouterProps.initialEntries} props.initialEntries n/a
  * @param {MemoryRouterProps.initialIndex} props.initialIndex n/a
- * @param {MemoryRouterProps.unstable_useTransitions} props.unstable_useTransitions n/a
+ * @param {MemoryRouterProps.useTransitions} props.useTransitions n/a
  * @returns A declarative in-memory {@link Router | `<Router>`} for client-side
  * routing.
  */
@@ -884,7 +884,7 @@ export function MemoryRouter({
   children,
   initialEntries,
   initialIndex,
-  unstable_useTransitions,
+  useTransitions,
 }: MemoryRouterProps): React.ReactElement {
   let historyRef = React.useRef<MemoryHistory>();
   if (historyRef.current == null) {
@@ -902,13 +902,13 @@ export function MemoryRouter({
   });
   let setState = React.useCallback(
     (newState: { action: NavigationType; location: Location }) => {
-      if (unstable_useTransitions === false) {
+      if (useTransitions === false) {
         setStateImpl(newState);
       } else {
         React.startTransition(() => setStateImpl(newState));
       }
     },
-    [unstable_useTransitions],
+    [useTransitions],
   );
 
   React.useLayoutEffect(() => history.listen(setState), [history, setState]);
@@ -920,7 +920,7 @@ export function MemoryRouter({
       location={state.location}
       navigationType={state.action}
       navigator={history}
-      unstable_useTransitions={unstable_useTransitions}
+      useTransitions={useTransitions}
     />
   );
 }
@@ -1349,9 +1349,9 @@ export interface RouterProps {
    * - When set to `false`, the router will not leverage `React.startTransition`
    *   on any navigations or state changes.
    *
-   * For more information, please see the [docs](https://reactrouter.com/explanation/react-transitions).
+   * For more information, please see the [docs](../../explanation/react-transitions).
    */
-  unstable_useTransitions?: boolean;
+  useTransitions?: boolean;
 }
 
 /**
@@ -1371,7 +1371,7 @@ export interface RouterProps {
  * @param {RouterProps.navigationType} props.navigationType n/a
  * @param {RouterProps.navigator} props.navigator n/a
  * @param {RouterProps.static} props.static n/a
- * @param {RouterProps.unstable_useTransitions} props.unstable_useTransitions n/a
+ * @param {RouterProps.useTransitions} props.useTransitions n/a
  * @returns React element for the rendered router or `null` if the location does
  * not match the {@link props.basename}
  */
@@ -1382,7 +1382,7 @@ export function Router({
   navigationType = NavigationType.Pop,
   navigator,
   static: staticProp = false,
-  unstable_useTransitions,
+  useTransitions,
 }: RouterProps): React.ReactElement | null {
   invariant(
     !useInRouterContext(),
@@ -1398,10 +1398,10 @@ export function Router({
       basename,
       navigator,
       static: staticProp,
-      unstable_useTransitions,
+      useTransitions,
       future: {},
     }),
-    [basename, navigator, staticProp, unstable_useTransitions],
+    [basename, navigator, staticProp, useTransitions],
   );
 
   if (typeof locationProp === "string") {
@@ -1414,7 +1414,7 @@ export function Router({
     hash = "",
     state = null,
     key = "default",
-    unstable_mask,
+    mask,
   } = locationProp;
 
   let locationContext = React.useMemo(() => {
@@ -1431,7 +1431,7 @@ export function Router({
         hash,
         state,
         key,
-        unstable_mask,
+        mask,
       },
       navigationType,
     };
@@ -1443,7 +1443,7 @@ export function Router({
     state,
     key,
     navigationType,
-    unstable_mask,
+    mask,
   ]);
 
   warning(
@@ -1684,7 +1684,7 @@ export function Await<Resolve>({
         dataRouterContext.onError(error, {
           location: dataRouterStateContext.location,
           params: dataRouterStateContext.matches[0]?.params || {},
-          unstable_pattern: getRoutePattern(dataRouterStateContext.matches),
+          pattern: getRoutePattern(dataRouterStateContext.matches),
           errorInfo,
         });
       }
