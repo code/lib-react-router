@@ -14,18 +14,28 @@ You can see the underlying `express` server configuration in [packages/react-rou
 - [`express.static`][express-static] (and thus [`serve-static`][serve-static])
 - [`morgan`][morgan]
 
+## Usage
+
+Install `@react-router/serve`:
+
+```sh nonumber
+npm install @react-router/serve
+```
+
+Run the server with your server build:
+
+```sh nonumber
+react-router-serve <server-build-path>
+# e.g.
+react-router-serve build/index.js
+```
+
 ## `HOST` environment variable
 
 You can configure the hostname for your Express app via `process.env.HOST` and that value will be passed to the internal [`app.listen`][express-listen] method when starting the server.
 
 ```shellscript nonumber
 HOST=127.0.0.1 npx react-router-serve build/index.js
-```
-
-```shellscript nonumber
-react-router-serve <server-build-path>
-# e.g.
-react-router-serve build/index.js
 ```
 
 ## `PORT` environment variable
