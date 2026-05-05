@@ -5,15 +5,12 @@
 ### Minor Changes
 
 - Stabilize `future.unstable_passThroughRequests` as `future.v8_passThroughRequests` ([a993f09](https://github.com/remix-run/react-router/commit/a993f09))
-
   - ⚠️ This is a breaking change if you have already opted into the unstable version - you will need to update your code accordingly
 
 - Stabilize `prerender.unstable_concurrency` as `prerender.concurrency` ([a993f09](https://github.com/remix-run/react-router/commit/a993f09))
-
   - ⚠️ This is a breaking change if you have already opted into the unstable version - you will need to update your code accordingly
 
 - Stabilize `future.unstable_subResourceIntegrity` as a top-level `subResourceIntegrity` config option in `react-router.config.ts` ([a993f09](https://github.com/remix-run/react-router/commit/a993f09))
-
   - ⚠️ This is a breaking change if you have already opted into the unstable version - you will need to update your code accordingly
 
 ### Patch Changes
