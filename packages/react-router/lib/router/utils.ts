@@ -271,19 +271,19 @@ interface DataFunctionArgs<Context> {
   /** A {@link https://developer.mozilla.org/en-US/docs/Web/API/Request Fetch Request instance} which you can use to read headers (like cookies, and {@link https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams URLSearchParams} from the request. */
   request: Request;
   /**
-   * A URL instance representing the application location being navigated to or fetched.
-   * Without `future.unstable_passThroughRequests` enabled, this matches `request.url`.
-   * With `future.unstable_passThroughRequests` enabled, this is a normalized
-   * URL with React-Router-specific implementation details removed (`.data`
-   * suffixes, `index`/`_routes` search params).
-   * The URL includes the origin from the request for convenience.
+   * A URL instance representing the application location being navigated to or
+   * fetched. By default, this matches `request.url`.
+   *
+   * In Framework mode with `future.v8_passThroughRequests` enabled, this is a
+   * normalized URL with React-Router-specific implementation details removed
+   * (`.data` suffixes, `index`/`_routes` search params).
    */
-  unstable_url: URL;
+  url: URL;
   /**
    * Matched un-interpolated route pattern for the current path (i.e., /blog/:slug).
    * Mostly useful as a identifier to aggregate on for logging/tracing/etc.
    */
-  unstable_pattern: string;
+  pattern: string;
   /**
    * {@link https://reactrouter.com/start/framework/routing#dynamic-segments Dynamic route params} for the current route.
    * @example
@@ -776,7 +776,7 @@ type Regex_w = Regex_az | Regex_AZ | Regex_09 | "_";
 
 // prettier-ignore
 /** Emulates Regex `+` operator */
-type RegexMatchPlus<char extends string, T extends string> = 
+type RegexMatchPlus<char extends string, T extends string> =
   _RegexMatchPlus<char, T> extends infer result extends string ?
     result extends '' ? never : result
   :
@@ -1020,6 +1020,7 @@ export function matchRoutesImpl<
   locationArg: Partial<Location> | string,
   basename: string,
   allowPartial: boolean,
+  precomputedBranches?: RouteBranch<RouteObjectType>[],
 ): RouteMatch<string, RouteObjectType>[] | null {
   let location =
     typeof locationArg === "string" ? parsePath(locationArg) : locationArg;
@@ -1030,10 +1031,10 @@ export function matchRoutesImpl<
     return null;
   }
 
-  let branches = flattenRoutes(routes);
-  rankRouteBranches(branches);
+  let branches = precomputedBranches ?? flattenAndRankRoutes(routes);
 
   let matches = null;
+  let decoded = decodePath(pathname);
   for (let i = 0; matches == null && i < branches.length; ++i) {
     // Incoming pathnames are generally encoded from either window.location
     // or from router.navigate, but we want to match against the unencoded
@@ -1041,7 +1042,6 @@ export function matchRoutesImpl<
     // encoded here but there also shouldn't be anything to decode so this
     // should be a safe operation.  This avoids needing matchRoutes to be
     // history-aware.
-    let decoded = decodePath(pathname);
     matches = matchRouteBranch<string, RouteObjectType>(
       branches[i],
       decoded,
@@ -1102,10 +1102,27 @@ interface RouteMeta<RouteObjectType extends RouteObject = RouteObject> {
   route: RouteObjectType;
 }
 
-interface RouteBranch<RouteObjectType extends RouteObject = RouteObject> {
+/**
+ * @private
+ * PRIVATE - DO NOT USE
+ *
+ * A "branch" of routes that match a given route pattern.
+ * This is an internal interface not intended for direct external usage.
+ */
+export interface RouteBranch<
+  RouteObjectType extends RouteObject = RouteObject,
+> {
   path: string;
   score: number;
   routesMeta: RouteMeta<RouteObjectType>[];
+}
+
+export function flattenAndRankRoutes<
+  RouteObjectType extends RouteObject = RouteObject,
+>(routes: RouteObjectType[]): RouteBranch<RouteObjectType>[] {
+  let branches = flattenRoutes(routes);
+  rankRouteBranches(branches);
+  return branches;
 }
 
 function flattenRoutes<RouteObjectType extends RouteObject = RouteObject>(

@@ -33,6 +33,7 @@ import type {
   Params,
   PathMatch,
   PathPattern,
+  RouteManifest,
   RouteMatch,
   RouteObject,
   UIMatch,
@@ -760,6 +761,7 @@ export function useRoutesImpl(
   routes: RouteObject[],
   locationArg?: Partial<Location> | string,
   dataRouterOpts?: {
+    manifest: RouteManifest;
     state: DataRouter["state"];
     isStatic: boolean;
     onError: ClientOnErrorFunction | undefined;
@@ -860,7 +862,16 @@ export function useRoutesImpl(
     remainingPathname = "/" + segments.slice(parentSegments.length).join("/");
   }
 
-  let matches = matchRoutes(routes, { pathname: remainingPathname });
+  let matches =
+    dataRouterOpts && dataRouterOpts.state.matches.length
+      ? // If we're in a data router, use the matches we've already identified but ensure
+        // we have the latest route instances from the manifest in case elements have changed
+        dataRouterOpts.state.matches.map((m) =>
+          Object.assign(m, {
+            route: dataRouterOpts.manifest[m.route.id] || m.route,
+          }),
+        )
+      : matchRoutes(routes, { pathname: remainingPathname });
 
   if (ENABLE_DEV_WARNINGS) {
     warning(
@@ -936,7 +947,7 @@ export function useRoutesImpl(
             hash: "",
             state: null,
             key: "default",
-            unstable_mask: undefined,
+            mask: undefined,
             ...location,
           },
           navigationType: NavigationType.Pop,
@@ -1283,7 +1294,7 @@ export function _renderMatches(
           onErrorHandler(error, {
             location: dataRouterState.location,
             params: dataRouterState.matches?.[0]?.params ?? {},
-            unstable_pattern: getRoutePattern(dataRouterState.matches),
+            pattern: getRoutePattern(dataRouterState.matches),
             errorInfo,
           });
         }

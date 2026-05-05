@@ -166,8 +166,8 @@ export function reactRouterRSCVitePlugin(): Vite.PluginOption[] {
               errors.push("future.v8_middleware: false");
             if (userConfig.future?.v8_viteEnvironmentApi === false)
               errors.push("future.v8_viteEnvironmentApi: false");
-            if (userConfig.future?.unstable_subResourceIntegrity)
-              errors.push("future.unstable_subResourceIntegrity");
+            if (userConfig.subResourceIntegrity)
+              errors.push("subResourceIntegrity");
             if (errors.length) {
               return `RSC Framework Mode does not currently support the following React Router config:\n${errors.map((x) => ` - ${x}`).join("\n")}\n`;
             }
@@ -805,8 +805,8 @@ function getPrerenderConcurrencyConfig(
 ): number {
   let concurrency = 1;
   let { prerender } = reactRouterConfig;
-  if (typeof prerender === "object" && "unstable_concurrency" in prerender) {
-    concurrency = prerender.unstable_concurrency ?? 1;
+  if (typeof prerender === "object" && "concurrency" in prerender) {
+    concurrency = prerender.concurrency ?? 1;
   }
   return concurrency;
 }
