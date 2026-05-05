@@ -33,7 +33,7 @@ jobs:
       has_change_files: ${{ steps.check.outputs.has_change_files }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Check for change files
         id: check
@@ -59,15 +59,16 @@ jobs:
       pull-requests: write # enable opening a PR for the release
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
+          fetch-depth: 0
           token: ${{ secrets.FORMAT_PAT }}
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
 
       - name: Install Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 24 # Needed to run typescript scripts directly
           cache: pnpm
@@ -115,30 +116,7 @@ jobs:
   comment:
     name: 📝 Comment on released issues/pull requests
     needs: publish
-    runs-on: ubuntu-latest
-    permissions:
-      issues: write # enable commenting on released issues
-      pull-requests: write # enable commenting on released pull requests
-    steps:
-      - name: ⬇️ Checkout repo
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: 📦 Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: ⎔ Setup node
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24 # Needed for node TS support
-          cache: "pnpm"
-
-      - name: 📥 Install deps
-        run: pnpm install --frozen-lockfile
-
-      - name: 📝 Comment on released issues and pull requests
-        run: pnpm run release-comments
+    uses: ./.github/workflows/release-comments.yml
 
   experimental-release:
     name: 🧪 Experimental Release
