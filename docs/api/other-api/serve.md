@@ -54,7 +54,7 @@ The `server-build-path` needs to point to the `serverBuildPath` defined in [`rea
 
 Because only the build artifacts (`build/`, `public/build/`) need to be deployed to production, the `react-router.config.ts` is not guaranteed to be available in production, so you need to tell React Router where your server build is with this option.
 
-In development, `react-router-serve` will ensure the latest code is run by purging the `require` cache for every request. This has some effects on your code you might need to be aware of:
+In development, `@react-router/serve` will ensure the latest code is run by purging the `require` cache for every request. This has some effects on your code you might need to be aware of:
 
 - Any values in the module scope will be "reset"
 
