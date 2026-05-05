@@ -1,1 +1,1 @@
-Add nonce to scripts modulepreload
+Add `nonce` to `<Scripts>` `<link rel="modulepreload">` elements (if provided)
