@@ -197,7 +197,9 @@ describe("unstable_useRouterState", () => {
     expect(captured?.pending?.location.pathname).toBe("/submit");
     expect(captured?.pending?.formMethod).toBe("POST");
     expect(captured?.pending?.formAction).toBe("/submit");
-    expect(captured?.pending?.formEncType).toBe("application/x-www-form-urlencoded");
+    expect(captured?.pending?.formEncType).toBe(
+      "application/x-www-form-urlencoded",
+    );
     expect(captured?.pending?.formData?.get("name")).toBe("Ryan");
     expect(captured?.pending?.json).toBeUndefined();
     expect(captured?.pending?.text).toBeUndefined();
