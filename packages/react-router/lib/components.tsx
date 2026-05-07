@@ -628,7 +628,7 @@ export function RouterProvider({
       setState(router.state, {
         deletedFetchers: [],
         flushSync: false,
-        newErrors: null,
+        newErrors: router.state.errors, // Initial data load errors
       });
     }
   }, [initialized, setState, router.state]);
