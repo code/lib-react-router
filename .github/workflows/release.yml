@@ -133,7 +133,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 24 # Needed for node TS support
-          cache: "pnpm"
+          package-manager-cache: false
 
       - name: 📥 Install deps
         run: pnpm install --frozen-lockfile
