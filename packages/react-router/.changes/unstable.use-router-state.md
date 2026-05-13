@@ -21,7 +21,7 @@ Add a new `unstable_useRouterState()` hook that consolidates access to active an
 
   // Pending is only populated during a navigation
   pending.location; // replaces `useNavigation().location`
-  pending.searchParams; // equivalent to `new URLSearchParams(useNavigation().search`
+  pending.searchParams; // equivalent to `new URLSearchParams(useNavigation().search)`
   pending.params; // Not directly accessible today
   pending.matches; // Not directly accessible today
   pending.type; // Not directly accessible today
