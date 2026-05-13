@@ -5741,7 +5741,9 @@ function testDomRouter(
       it("useFetchers returns stable array reference when fetchers are unchanged", async () => {
         let fetchDfd = createDeferred();
         let fetchersArrays: (Fetcher & { key: string })[][] = [];
-        let setCountRef = { current: null as React.Dispatch<React.SetStateAction<number>> | null };
+        let setCountRef = {
+          current: null as React.Dispatch<React.SetStateAction<number>> | null,
+        };
 
         function Parent() {
           let fetchers = useFetchers();
@@ -5749,9 +5751,7 @@ function testDomRouter(
           let [, setCount] = React.useState(0);
           setCountRef.current = setCount;
           fetchersArrays.push(fetchers);
-          return (
-            <button onClick={() => fetcher.load("/fetch")}>load</button>
-          );
+          return <button onClick={() => fetcher.load("/fetch")}>load</button>;
         }
 
         let router = createTestRouter(
@@ -5804,9 +5804,7 @@ function testDomRouter(
           let fetchers = useFetchers();
           let fetcher = useFetcher();
           states.push(fetchers.map((f) => f.state).join(",") || "empty");
-          return (
-            <button onClick={() => fetcher.load("/fetch")}>load</button>
-          );
+          return <button onClick={() => fetcher.load("/fetch")}>load</button>;
         }
 
         let router = createTestRouter(
