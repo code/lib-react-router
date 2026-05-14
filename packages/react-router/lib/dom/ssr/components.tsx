@@ -726,7 +726,10 @@ export function Meta(): React.JSX.Element {
                 dangerouslySetInnerHTML={{ __html: escapeHtml(json) }}
               />
             );
-          } catch (err) {
+          } catch (
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            e
+          ) {
             return null;
           }
         }
@@ -975,13 +978,16 @@ import(${JSON.stringify(manifest.entry.module)});`;
   let preloads =
     isHydrated || isRSCRouterContext
       ? []
-      : dedupe(
-          manifest.entry.imports.concat(
-            getModuleLinkHrefs(matches, manifest, {
-              includeHydrateFallback: true,
-            }),
+      : [
+          // Dedupe through a Set
+          ...new Set(
+            manifest.entry.imports.concat(
+              getModuleLinkHrefs(matches, manifest, {
+                includeHydrateFallback: true,
+              }),
+            ),
           ),
-        );
+        ];
 
   let sri = typeof manifest.sri === "object" ? manifest.sri : {};
 
@@ -1037,10 +1043,6 @@ import(${JSON.stringify(manifest.entry.module)});`;
       {initialScripts}
     </>
   );
-}
-
-function dedupe(array: any[]) {
-  return [...new Set(array)];
 }
 
 export function mergeRefs<T = any>(
